@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block nav_feed %}active{% endblock %}
+{% block content %}
+<style>
+  .page-header{margin-bottom:1.8rem;animation:fadeUp .4s ease;}
+  .page-header h1{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:700;letter-spacing:-.5px;line-height:1;}
+  .page-header h1 span{color:var(--gold);font-style:italic;}
+  .page-header p{color:var(--text-2);font-size:.88rem;margin-top:.35rem;}
+
+  /* SEARCH */
+  .search-bar{display:flex;gap:.6rem;margin-bottom:2rem;animation:fadeUp .45s ease;}
+  .search-wrap{flex:1;display:flex;align-items:center;gap:.5rem;background:var(--card);border:1px solid var(--border);border-radius:99px;padding:.55rem 1.1rem;transition:border-color .2s;}
+  .search-wrap:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+  .search-wrap svg{color:var(--text-3);flex-shrink:0;}
+  .search-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;width:100%;}
+  .search-wrap input::placeholder{color:var(--text-3);}
+  .btn-search{background:var(--gold);color:#0c0b14;border:none;border-radius:99px;padding:.55rem 1.3rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;}
+  .btn-search:hover{filter:brightness(1.1);}
+  .btn-clear{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,96,96,.2);border-radius:99px;padding:.55rem 1rem;font-size:.82rem;font-weight:500;transition:all .2s;}
+  .btn-clear:hover{background:rgba(224,96,96,.2);}
+
+  /* GRID */
+  .files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.1rem;}
+
+  /* CARD */
+  .file-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .22s,box-shadow .22s,border-color .22s;animation:fadeUp .45s ease both;display:flex;flex-direction:column;}
+  .file-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.22);border-color:var(--border-h);}
+  .file-card:nth-child(2){animation-delay:.04s}
+  .file-card:nth-child(3){animation-delay:.08s}
+  .file-card:nth-child(4){animation-delay:.12s}
+  .file-card:nth-child(5){animation-delay:.16s}
+  .file-card:nth-child(6){animation-delay:.20s}
+
+  /* PREVIEW */
+  .file-preview{width:100%;height:180px;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+  .file-preview img{width:100%;height:100%;object-fit:cover;}
+  .file-preview video{width:100%;height:100%;object-fit:cover;}
+  .file-icon{font-size:3.5rem;opacity:.35;}
+
+  /* CARD BODY */
+  .card-body{padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.6rem;flex:1;}
+  .card-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;line-height:1.3;color:var(--text);}
+  .card-desc{font-size:.82rem;color:var(--text-2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-meta{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text-3);}
+  .card-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3);}
+
+  /* CARD FOOTER */
+  .card-footer{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.2rem;border-top:1px solid var(--border);margin-top:auto;}
+  .card-actions{display:flex;gap:.4rem;align-items:center;}
+
+  .action-btn{display:flex;align-items:center;gap:.3rem;background:none;border:1px solid var(--border);border-radius:8px;padding:.3rem .65rem;font-size:.78rem;color:var(--text-2);transition:all .18s;cursor:pointer;}
+  .action-btn:hover{background:var(--border);color:var(--text);}
+  .action-btn.liked{color:#e06060;border-color:rgba(224,96,96,.3);background:rgba(224,96,96,.08);}
+  .action-btn.liked:hover{background:rgba(224,96,96,.15);}
+  .action-btn.download:hover{color:var(--green);border-color:var(--green);background:var(--green-dim);}
+  .action-btn.view:hover{color:var(--gold);border-color:var(--gold);background:var(--gold-dim);}
+
+  .uploader-link{font-size:.75rem;color:var(--text-3);display:flex;align-items:center;gap:.35rem;}
+  .uploader-link:hover{color:var(--gold);}
+  .mini-avatar{width:20px;height:20px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--gold);overflow:hidden;}
+  .mini-avatar img{width:100%;height:100%;object-fit:cover;}
+
+  /* EMPTY */
+  .empty{text-align:center;padding:5rem 2rem;animation:fadeUp .5s ease;}
+  .empty-icon{font-size:3rem;opacity:.25;margin-bottom:1rem;}
+  .empty h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:.4rem;}
+  .empty p{color:var(--text-2);font-size:.88rem;margin-bottom:1.4rem;}
+  .btn-gold{display:inline-flex;align-items:center;gap:.4rem;background:var(--gold);color:#0c0b14;border:none;border-radius:99px;padding:.6rem 1.4rem;font-family:'Outfit',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s;}
+  .btn-gold:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 18px var(--gold-glow);}
+
+  /* EXT BADGE */
+  .ext-badge{display:inline-flex;align-items:center;padding:.15rem .55rem;border-radius:99px;font-size:.68rem;font-weight:600;letter-spacing:.04em;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(212,168,67,.2);text-transform:uppercase;}
+</style>
+
+<div class="page-header">
+  <h1>Shared <span>Files</span></h1>
+  <p>Browse and download files shared by the community.</p>
+</div>
+
+<form method="GET">
+  <div class="search-bar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" name="q" placeholder="Search files…" value="{{ query }}">
+    </div>
+    <button type="submit" class="btn-search">Search</button>
+    {% if query %}<a href="/" class="btn-clear">✕ Clear</a>{% endif %}
+  </div>
+</form>
+
+{% if files %}
+<div class="files-grid">
+  {% for f in files %}
+  <div class="file-card">
+
+    <!-- PREVIEW -->
+    <div class="file-preview">
+      {% if f.is_image %}
+        <img src="{{ f.file.url }}" alt="{{ f.title }}" loading="lazy">
+      {% elif f.is_video %}
+        <video src="{{ f.file.url }}" muted></video>
+      {% elif f.is_audio %}
+        <div class="file-icon">🎵</div>
+      {% elif f.is_pdf %}
+        <div class="file-icon">📄</div>
+      {% else %}
+        <div class="file-icon">📦</div>
+      {% endif %}
+    </div>
+
+    <!-- BODY -->
+    <div class="card-body">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;">
+        <div class="card-title">{{ f.title }}</div>
+        <span class="ext-badge">{{ f.extension }}</span>
+      </div>
+      {% if f.description %}<div class="card-desc">{{ f.description }}</div>{% endif %}
+      <div class="card-meta">
+        <span>{{ f.uploaded_at|date:"M d, Y" }}</span>
+        <span class="dot"></span>
+        <span>{{ f.like_count }} like{{ f.like_count|pluralize }}</span>
+        <span class="dot"></span>
+        <span>{{ f.comment_count }} comment{{ f.comment_count|pluralize }}</span>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="card-footer">
+      <a href="/profile/{{ f.user.username }}/" class="uploader-link">
+        <div class="mini-avatar">
+          {% if f.user.profile.avatar %}<img src="{{ f.user.profile.avatar.url }}">{% else %}{{ f.user.username|first|upper }}{% endif %}
+        </div>
+        {{ f.user.username }}
+      </a>
+      <div class="card-actions">
+        <!-- LIKE -->
+        <form method="POST" action="/file/{{ f.pk }}/like/">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="/">
+          <button type="submit" class="action-btn {% if f.pk in liked_ids %}liked{% endif %}">
+            {% if f.pk in liked_ids %}❤️{% else %}🤍{% endif %} {{ f.like_count }}
+          </button>
+        </form>
+        <!-- COMMENT -->
+        <a href="/file/{{ f.pk }}/" class="action-btn view">💬 {{ f.comment_count }}</a>
+        <!-- DOWNLOAD -->
+        <a href="/file/{{ f.pk }}/download/" class="action-btn download">⬇️</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty">
+  <div class="empty-icon">📂</div>
+  <h3>{% if query %}Nothing found{% else %}No files yet{% endif %}</h3>
+  <p>{% if query %}Try a different search term.{% else %}Be the first to share something!{% endif %}</p>
+  {% if not query %}
+  <a href="/upload/" class="btn-gold">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+    Upload first file
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .cat-page { max-width: 480px; margin: 0 auto; animation: fadeUp .4s ease; }
+  .cat-page .form-header { margin-bottom: 1.8rem; }
+  .cat-page .form-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem; font-weight: 700; letter-spacing: -.5px;
+  }
+  .cat-page .form-header h1 span { color: var(--gold); font-style: italic; }
+  .cat-page .form-header p { color: var(--text-2); font-size: .88rem; margin-top: .3rem; }
+
+  .cat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    display: flex; flex-direction: column; gap: 1.2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  }
+  .color-row {
+    display: flex; align-items: center; gap: 1rem;
+  }
+  input[type="color"] {
+    width: 48px; height: 48px; border: 2px solid var(--border);
+    border-radius: var(--radius-sm); cursor: pointer;
+    background: none; padding: 2px;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border-radius: 6px; border: none; }
+
+  .color-swatches { display: flex; gap: .45rem; flex-wrap: wrap; }
+  .swatch {
+    width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: transform .15s, border-color .15s;
+  }
+  .swatch:hover { transform: scale(1.2); border-color: white; }
+
+  .form-actions { display: flex; gap: .7rem; }
+  .btn-submit {
+    flex: 1; background: var(--gold); color: #0c0b14;
+    border: none; border-radius: var(--radius-sm);
+    padding: .8rem; font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: .92rem; cursor: pointer; transition: all .2s;
+  }
+  .btn-submit:hover { filter: brightness(1.1); }
+  .btn-cancel {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-2); border-radius: var(--radius-sm);
+    padding: .8rem 1.2rem; font-family: 'Outfit', sans-serif;
+    font-size: .92rem; cursor: pointer; transition: all .2s;
+  }
+  .btn-cancel:hover { color: var(--text); border-color: var(--border-h); }
+</style>
+
+<div class="cat-page">
+  <div class="form-header">
+    <h1>New <span>Category</span></h1>
+    <p>Organise your notes with a colour-coded label.</p>
+  </div>
+
+  <div class="cat-card">
+    <form method="POST">
+      {% csrf_token %}
+      <div class="field-group">
+        <label class="field-label">Category Name</label>
+        <input class="field-input" type="text" name="name" placeholder="e.g. Work, Personal, Ideas…" required autofocus>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Colour</label>
+        <div class="color-row">
+          <input type="color" name="color" id="colorPicker" value="#e8c547">
+          <div class="color-swatches">
+            {% for c in "#e8c547,#ff6b6b,#6bcbff,#6dc87a,#c97af5,#ff9f43,#ff78c4,#a0a8b5" %}
+            <div class="swatch" style="background:{{ c }}" onclick="document.getElementById('colorPicker').value='{{ c }}'"></div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-submit">Create Category</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

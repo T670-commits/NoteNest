@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .form-page { max-width: 640px; margin: 0 auto; animation: fadeUp .4s ease; }
+
+  .form-header { margin-bottom: 2rem; }
+  .form-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem; font-weight: 700; line-height: 1; letter-spacing: -.5px;
+  }
+  .form-header h1 span { color: var(--gold); font-style: italic; }
+  .form-header p { color: var(--text-2); font-size: .88rem; margin-top: .35rem; }
+
+  .form-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    display: flex; flex-direction: column; gap: 1.2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .section-divider {
+    height: 1px; background: var(--border); margin: .2rem 0;
+  }
+  .section-label {
+    font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-3);
+  }
+
+  /* password field hidden by default */
+  .password-field { display: none; }
+  .password-field.visible { display: flex; flex-direction: column; gap: .45rem; }
+
+  /* char counter */
+  .char-hint { font-size: .72rem; color: var(--text-3); text-align: right; }
+
+  /* actions */
+  .form-actions { display: flex; gap: .7rem; margin-top: .4rem; }
+  .btn-submit {
+    flex: 1; background: var(--gold); color: #0c0b14;
+    border: none; border-radius: var(--radius-sm);
+    padding: .8rem 1.4rem; font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: .92rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+    transition: all .2s;
+  }
+  .btn-submit:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 18px var(--gold-glow); }
+  .btn-cancel {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-2); border-radius: var(--radius-sm);
+    padding: .8rem 1.2rem; font-family: 'Outfit', sans-serif;
+    font-weight: 500; font-size: .92rem; cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-cancel:hover { border-color: var(--border-h); color: var(--text); }
+
+  .tip-box {
+    display: flex; align-items: flex-start; gap: .6rem;
+    background: var(--gold-dim); border: 1px solid rgba(212,168,67,.2);
+    border-radius: var(--radius-sm); padding: .7rem .9rem;
+    font-size: .78rem; color: var(--text-2); line-height: 1.5;
+  }
+</style>
+
+<div class="form-page">
+  <div class="form-header">
+    <h1>{% if action == 'Edit' %}<span>Edit</span> Note{% else %}New <span>Note</span>{% endif %}</h1>
+    <p>{% if action == 'Edit' %}Update your note below.{% else %}Capture your thought before it slips away.{% endif %}</p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- TITLE -->
+      <div class="field-group">
+        <label class="field-label">Title</label>
+        <input class="field-input" type="text" name="title" placeholder="Give your note a title…"
+               value="{% if note %}{{ note.title }}{% endif %}" required autofocus>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="field-group">
+        <label class="field-label">Content</label>
+        <textarea class="field-textarea" name="content" id="contentArea"
+                  placeholder="Write your thoughts here…"
+                  oninput="updateCount(this)" required>{% if note %}{{ note.content }}{% endif %}</textarea>
+        <div class="char-hint" id="charCount">0 characters</div>
+      </div>
+
+      <!-- CATEGORY + DUE DATE -->
+      <div class="form-row">
+        <div class="field-group">
+          <label class="field-label">🏷️ Category</label>
+          <select class="field-select" name="category">
+            <option value="">No category</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if note and note.category_id == cat.id %}selected{% endif %}>
+                {{ cat.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">📅 Due Date</label>
+          <input class="field-input" type="date" name="due_date"
+                 value="{% if note and note.due_date %}{{ note.due_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="section-label">Options</div>
+
+      <!-- TOGGLES -->
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">📌 Pin this note</div>
+          <div class="toggle-desc">Keep it at the top of your list</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" name="is_pinned" {% if note and note.is_pinned %}checked{% endif %}>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">⭐ Mark as favorite</div>
+          <div class="toggle-desc">Show in your Favorites list</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" name="is_favorite" {% if note and note.is_favorite %}checked{% endif %}>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">🔒 Password protect</div>
+          <div class="toggle-desc">Hide content behind a password</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" name="is_protected" id="protectToggle"
+                 {% if note and note.is_protected %}checked{% endif %}
+                 onchange="togglePassword(this)">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <!-- PASSWORD FIELD (shown when protected is on) -->
+      <div class="password-field {% if note and note.is_protected %}visible{% endif %}" id="passwordField">
+        <div class="field-group">
+          <label class="field-label">🔑 Password</label>
+          <input class="field-input" type="password" name="password"
+                 placeholder="Set a password for this note…"
+                 value="{% if note %}{{ note.password }}{% endif %}">
+        </div>
+        <div class="tip-box">
+          💡 Remember this password — there's no recovery option if you forget it.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ACTIONS -->
+      <div class="form-actions">
+        <a href="/" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-submit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          {% if action == 'Edit' %}Update Note{% else %}Save Note{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Char counter
+  function updateCount(el) {
+    const n = el.value.length;
+    document.getElementById('charCount').textContent = n + ' character' + (n !== 1 ? 's' : '');
+  }
+  // Init count on edit
+  const ta = document.getElementById('contentArea');
+  if (ta && ta.value) updateCount(ta);
+
+  // Password field toggle
+  function togglePassword(cb) {
+    const field = document.getElementById('passwordField');
+    field.classList.toggle('visible', cb.checked);
+  }
+</script>
+{% endblock %}

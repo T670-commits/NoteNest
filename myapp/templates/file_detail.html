@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .detail-wrap{max-width:780px;margin:0 auto;animation:fadeUp .4s ease;}
+  .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-2);font-size:.83rem;margin-bottom:1.4rem;transition:color .2s;}
+  .back-link:hover{color:var(--gold);}
+
+  .detail-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);}
+
+  /* PREVIEW */
+  .detail-preview{width:100%;max-height:420px;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .detail-preview img{width:100%;max-height:420px;object-fit:contain;}
+  .detail-preview video,.detail-preview audio{width:100%;padding:1rem;}
+  .detail-preview .big-icon{font-size:5rem;opacity:.2;padding:3rem;}
+
+  /* INFO */
+  .detail-info{padding:1.5rem 1.8rem;display:flex;flex-direction:column;gap:.8rem;}
+  .detail-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;letter-spacing:-.3px;line-height:1.2;}
+  .detail-desc{color:var(--text-2);font-size:.88rem;line-height:1.6;}
+  .detail-meta{display:flex;align-items:center;gap:.6rem;font-size:.78rem;color:var(--text-3);flex-wrap:wrap;}
+  .detail-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3);}
+
+  .detail-actions{display:flex;gap:.6rem;flex-wrap:wrap;}
+  .det-btn{display:flex;align-items:center;gap:.4rem;border-radius:10px;padding:.55rem 1.1rem;font-family:'Outfit',sans-serif;font-weight:500;font-size:.85rem;cursor:pointer;transition:all .2s;border:1px solid var(--border);}
+  .det-btn.like{background:none;color:var(--text-2);}
+  .det-btn.like:hover,.det-btn.like.liked{color:var(--red);border-color:rgba(224,96,96,.3);background:rgba(224,96,96,.08);}
+  .det-btn.download{background:var(--green-dim);color:var(--green);border-color:rgba(93,186,125,.2);}
+  .det-btn.download:hover{background:rgba(93,186,125,.2);}
+  .det-btn.delete{background:var(--red-dim);color:var(--red);border-color:rgba(224,96,96,.2);}
+  .det-btn.delete:hover{background:rgba(224,96,96,.2);}
+
+  /* COMMENTS */
+  .comments-section{padding:1.5rem 1.8rem;border-top:1px solid var(--border);}
+  .comments-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;margin-bottom:1.1rem;}
+
+  .comment{display:flex;gap:.8rem;margin-bottom:1rem;animation:fadeUp .3s ease;}
+  .comment-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--gold);flex-shrink:0;overflow:hidden;}
+  .comment-avatar img{width:100%;height:100%;object-fit:cover;}
+  .comment-body{flex:1;}
+  .comment-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;}
+  .comment-user{font-size:.82rem;font-weight:600;color:var(--text);}
+  .comment-date{font-size:.72rem;color:var(--text-3);}
+  .comment-text{font-size:.86rem;color:var(--text-2);line-height:1.55;}
+  .comment-del{background:none;border:none;color:var(--text-3);font-size:.72rem;cursor:pointer;margin-left:auto;transition:color .2s;}
+  .comment-del:hover{color:var(--red);}
+
+  .comment-form{margin-top:1.2rem;display:flex;flex-direction:column;gap:.7rem;}
+  .btn-comment{background:var(--gold);color:#0c0b14;border:none;border-radius:10px;padding:.7rem 1.4rem;font-family:'Outfit',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;align-self:flex-end;transition:all .2s;}
+  .btn-comment:hover{filter:brightness(1.1);}
+
+  .no-comments{color:var(--text-3);font-size:.85rem;font-style:italic;}
+</style>
+
+<div class="detail-wrap">
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Feed
+  </a>
+
+  <div class="detail-card">
+    <!-- PREVIEW -->
+    <div class="detail-preview">
+      {% if file.is_image %}
+        <img src="{{ file.file.url }}" alt="{{ file.title }}">
+      {% elif file.is_video %}
+        <video src="{{ file.file.url }}" controls></video>
+      {% elif file.is_audio %}
+        <audio src="{{ file.file.url }}" controls></audio>
+      {% elif file.is_pdf %}
+        <div class="big-icon">📄</div>
+      {% else %}
+        <div class="big-icon">📦</div>
+      {% endif %}
+    </div>
+
+    <!-- INFO -->
+    <div class="detail-info">
+      <div class="detail-title">{{ file.title }}</div>
+      {% if file.description %}<div class="detail-desc">{{ file.description }}</div>{% endif %}
+      <div class="detail-meta">
+        <a href="/profile/{{ file.user.username }}/" style="color:var(--gold);">{{ file.user.username }}</a>
+        <span class="dot"></span>
+        <span>{{ file.uploaded_at|date:"M d, Y" }}</span>
+        <span class="dot"></span>
+        <span>{{ file.filename }}</span>
+      </div>
+      <div class="detail-actions">
+        <!-- LIKE -->
+        <form method="POST" action="/file/{{ file.pk }}/like/">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="/file/{{ file.pk }}/">
+          <button type="submit" class="det-btn like {% if liked %}liked{% endif %}">
+            {% if liked %}❤️ Liked{% else %}🤍 Like{% endif %} · {{ file.like_count }}
+          </button>
+        </form>
+        <!-- DOWNLOAD -->
+        <a href="/file/{{ file.pk }}/download/" class="det-btn download">⬇️ Download</a>
+        <!-- DELETE (owner only) -->
+        {% if request.user == file.user %}
+        <a href="/file/{{ file.pk }}/delete/" class="det-btn delete"
+           onclick="return confirm('Delete this file?')">🗑 Delete</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- COMMENTS -->
+    <div class="comments-section">
+      <div class="comments-title">💬 Comments ({{ file.comment_count }})</div>
+
+      {% if comments %}
+        {% for c in comments %}
+        <div class="comment">
+          <div class="comment-avatar">
+            {% if c.user.profile.avatar %}<img src="{{ c.user.profile.avatar.url }}">
+            {% else %}{{ c.user.username|first|upper }}{% endif %}
+          </div>
+          <div class="comment-body">
+            <div class="comment-header">
+              <a href="/profile/{{ c.user.username }}/" class="comment-user">{{ c.user.username }}</a>
+              <span class="comment-date">{{ c.created_at|date:"M d, Y" }}</span>
+              {% if request.user == c.user %}
+              <a href="/comment/{{ c.pk }}/delete/" class="comment-del" onclick="return confirm('Delete comment?')">✕ delete</a>
+              {% endif %}
+            </div>
+            <div class="comment-text">{{ c.body }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="no-comments">No comments yet — be the first!</div>
+      {% endif %}
+
+      <!-- ADD COMMENT -->
+      <form method="POST" class="comment-form">
+        {% csrf_token %}
+        <textarea class="f-textarea" name="body" placeholder="Write a comment…" required style="min-height:80px;"></textarea>
+        <button type="submit" class="btn-comment">Post Comment</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

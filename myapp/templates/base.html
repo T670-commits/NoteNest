@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NoteNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    [data-theme="dark"]{
+      --bg:#0c0b14;--bg2:#13111f;--card:#1a1728;--nav:rgba(12,11,20,.9);
+      --border:rgba(255,255,255,.07);--border-h:rgba(255,255,255,.14);
+      --gold:#d4a843;--gold-dim:rgba(212,168,67,.12);--gold-glow:rgba(212,168,67,.25);
+      --red:#e06060;--red-dim:rgba(224,96,96,.12);
+      --green:#5dba7d;--green-dim:rgba(93,186,125,.12);
+      --blue:#5ba3d4;--text:#eceaf5;--text-2:#7a7893;--text-3:#4e4c68;
+      --input:rgba(255,255,255,.04);
+    }
+    [data-theme="light"]{
+      --bg:#f7f5ef;--bg2:#eeecea;--card:#fff;--nav:rgba(247,245,239,.9);
+      --border:rgba(0,0,0,.08);--border-h:rgba(0,0,0,.15);
+      --gold:#b8882a;--gold-dim:rgba(184,136,42,.1);--gold-glow:rgba(184,136,42,.22);
+      --red:#c94f4f;--red-dim:rgba(201,79,79,.1);
+      --green:#3d9e5f;--green-dim:rgba(61,158,95,.1);
+      --blue:#3a7fb5;--text:#1a1728;--text-2:#6b697e;--text-3:#a8a6b8;
+      --input:rgba(0,0,0,.03);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+    a{text-decoration:none;color:inherit;}
+    button{font-family:inherit;cursor:pointer;}
+
+    /* NAV */
+    .nav{
+      position:sticky;top:0;z-index:300;
+      background:var(--nav);backdrop-filter:blur(20px) saturate(1.4);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 2rem;height:60px;gap:1rem;
+    }
+    .nav-brand{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:var(--gold);letter-spacing:-.5px;flex-shrink:0;}
+    .nav-brand em{color:var(--text);font-style:normal;}
+    .nav-links{display:flex;gap:.2rem;flex:1;}
+    .nav-link{font-size:.82rem;font-weight:500;color:var(--text-2);padding:.35rem .85rem;border-radius:99px;transition:all .2s;}
+    .nav-link:hover{color:var(--text);background:var(--border);}
+    .nav-link.active{color:var(--gold);background:var(--gold-dim);}
+    .nav-end{display:flex;align-items:center;gap:.55rem;flex-shrink:0;}
+
+    .user-chip{display:flex;align-items:center;gap:.45rem;background:var(--card);border:1px solid var(--border);border-radius:99px;padding:.28rem .75rem .28rem .4rem;font-size:.8rem;}
+    .avatar{width:26px;height:26px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:var(--gold);overflow:hidden;flex-shrink:0;}
+    .avatar img{width:100%;height:100%;object-fit:cover;}
+    .user-name{color:var(--text-2);font-weight:500;}
+
+    .theme-btn{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text-2);font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+    .theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+    .btn-upload{background:var(--gold);color:#0c0b14;border:none;border-radius:99px;padding:.42rem 1.1rem;font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.35rem;transition:all .2s;}
+    .btn-upload:hover{filter:brightness(1.1);box-shadow:0 4px 18px var(--gold-glow);transform:translateY(-1px);}
+
+    .btn-logout{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,96,96,.2);border-radius:99px;padding:.35rem .85rem;font-size:.78rem;font-weight:500;display:flex;align-items:center;gap:.3rem;transition:all .2s;}
+    .btn-logout:hover{background:rgba(224,96,96,.2);}
+
+    /* MAIN */
+    .main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+
+    /* TOASTS */
+    .toasts{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;}
+    .toast{padding:.65rem 1rem;border-radius:8px;font-size:.84rem;font-weight:500;animation:slideIn .3s ease;}
+    .toast.success{background:var(--green-dim);border:1px solid var(--green);color:var(--green);}
+    .toast.error{background:var(--red-dim);border:1px solid var(--red);color:var(--red);}
+    .toast.info,.toast{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);}
+
+    /* FORM SHARED */
+    .f-group{display:flex;flex-direction:column;gap:.4rem;}
+    .f-label{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);}
+    .f-input,.f-textarea{background:var(--input);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+    .f-input:focus,.f-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+    .f-input::placeholder,.f-textarea::placeholder{color:var(--text-3);}
+    .f-textarea{resize:vertical;min-height:110px;}
+
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-brand" href="/">Note<em>Nest</em></a>
+  <div class="nav-links">
+    <a href="/" class="nav-link {% block nav_feed %}{% endblock %}">🏠 Feed</a>
+    <a href="/upload/" class="nav-link {% block nav_upload %}{% endblock %}">⬆️ Upload</a>
+    {% if user.is_authenticated %}
+    <a href="/profile/{{ user.username }}/" class="nav-link {% block nav_profile %}{% endblock %}">👤 My Profile</a>
+    {% endif %}
+  </div>
+  <div class="nav-end">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    {% if user.is_authenticated %}
+    <a href="/profile/{{ user.username }}/" class="user-chip">
+      <div class="avatar">
+        {% if user.profile.avatar %}
+          <img src="{{ user.profile.avatar.url }}" alt="avatar">
+        {% else %}
+          {{ user.username|first|upper }}
+        {% endif %}
+      </div>
+      <span class="user-name">{{ user.username }}</span>
+    </a>
+    <a href="/logout/" class="btn-logout">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+    {% endif %}
+    <a href="/upload/" class="btn-upload">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Upload
+    </a>
+  </div>
+</nav>
+
+<div class="main">
+  {% if messages %}
+  <div class="toasts">
+    {% for msg in messages %}<div class="toast {{ msg.tags }}">{{ msg }}</div>{% endfor %}
+  </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</div>
+
+<script>
+  (function(){
+    const t=localStorage.getItem('nn-theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    document.getElementById('themeBtn').textContent=t==='dark'?'🌙':'☀️';
+  })();
+  function toggleTheme(){
+    const cur=document.documentElement.getAttribute('data-theme');
+    const next=cur==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('nn-theme',next);
+    document.getElementById('themeBtn').textContent=next==='dark'?'🌙':'☀️';
+  }
+</script>
+</body>
+</html>

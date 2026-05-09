@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .unlock-page {
+    max-width: 420px; margin: 4rem auto;
+    text-align: center; animation: fadeUp .4s ease;
+  }
+  .lock-icon { font-size: 3rem; margin-bottom: 1.2rem; opacity: .5; }
+  .unlock-page h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem; font-weight: 700; margin-bottom: .4rem;
+  }
+  .unlock-page p { color: var(--text-2); font-size: .88rem; margin-bottom: 2rem; }
+  .unlock-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.12);
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .btn-unlock {
+    background: var(--gold); color: #0c0b14;
+    border: none; border-radius: var(--radius-sm);
+    padding: .8rem; font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: .92rem; cursor: pointer;
+    transition: all .2s; width: 100%;
+  }
+  .btn-unlock:hover { filter: brightness(1.1); }
+  .back-link { color: var(--text-2); font-size: .82rem; margin-top: .5rem; display: inline-block; }
+  .back-link:hover { color: var(--text); }
+</style>
+
+<div class="unlock-page">
+  <div class="lock-icon">🔒</div>
+  <h2>Protected Note</h2>
+  <p>"{{ note.title }}" is password protected. Enter the password to view or edit.</p>
+
+  <div class="unlock-card">
+    <form method="POST">
+      {% csrf_token %}
+      <div class="field-group" style="margin-bottom:.4rem;">
+        <label class="field-label">Password</label>
+        <input class="field-input" type="password" name="unlock_password"
+               placeholder="Enter password…" required autofocus>
+      </div>
+      <button type="submit" class="btn-unlock">🔓 Unlock Note</button>
+    </form>
+  </div>
+  <a href="/" class="back-link">← Back to notes</a>
+</div>
+
+{% endblock %}

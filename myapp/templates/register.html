@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Register — NoteNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    [data-theme="dark"]{--bg:#0c0b14;--card:#1a1728;--border:rgba(255,255,255,.07);--gold:#d4a843;--gold-dim:rgba(212,168,67,.12);--gold-glow:rgba(212,168,67,.25);--red:#e06060;--red-dim:rgba(224,96,96,.12);--green:#5dba7d;--green-dim:rgba(93,186,125,.12);--text:#eceaf5;--text-2:#7a7893;--text-3:#4e4c68;--input:rgba(255,255,255,.04);}
+    [data-theme="light"]{--bg:#f7f5ef;--card:#fff;--border:rgba(0,0,0,.08);--gold:#b8882a;--gold-dim:rgba(184,136,42,.1);--gold-glow:rgba(184,136,42,.22);--red:#c94f4f;--red-dim:rgba(201,79,79,.1);--green:#3d9e5f;--green-dim:rgba(61,158,95,.1);--text:#1a1728;--text-2:#6b697e;--text-3:#a8a6b8;--input:rgba(0,0,0,.03);}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;transition:background .3s,color .3s;}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 75% 25%,rgba(212,168,67,.06) 0%,transparent 55%),radial-gradient(ellipse at 25% 75%,rgba(93,186,125,.05) 0%,transparent 55%);}
+    .wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:1.4rem;animation:fadeUp .45s ease;position:relative;}
+    .brand{text-align:center;}
+    .brand-logo{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:var(--gold);letter-spacing:-.5px;}
+    .brand-logo em{color:var(--text);font-style:normal;}
+    .brand-sub{font-size:.82rem;color:var(--text-2);margin-top:.3rem;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2rem;display:flex;flex-direction:column;gap:1rem;box-shadow:0 16px 48px rgba(0,0,0,.18);}
+    .card-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;}
+    .card-title span{color:var(--gold);font-style:italic;}
+    .card-sub{font-size:.82rem;color:var(--text-2);}
+    .perks{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;background:var(--gold-dim);border:1px solid rgba(212,168,67,.15);border-radius:10px;padding:.8rem;}
+    .perk{font-size:.76rem;color:var(--text-2);display:flex;align-items:center;gap:.3rem;}
+    .fields{display:flex;flex-direction:column;gap:.8rem;}
+    .field{display:flex;flex-direction:column;gap:.38rem;}
+    .field label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);}
+    .fw{position:relative;display:flex;align-items:center;}
+    .fw svg{position:absolute;left:.9rem;color:var(--text-3);pointer-events:none;}
+    .fw input{width:100%;background:var(--input);border:1px solid var(--border);border-radius:10px;padding:.72rem 1rem .72rem 2.5rem;color:var(--text);font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+    .fw input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+    .fw input::placeholder{color:var(--text-3);}
+    .eye{position:absolute;right:.85rem;background:none;border:none;color:var(--text-3);cursor:pointer;font-size:.88rem;}
+    .strength-bar{height:3px;border-radius:99px;background:var(--border);overflow:hidden;margin-top:.3rem;}
+    .strength-fill{height:100%;width:0;border-radius:99px;transition:width .3s,background .3s;}
+    .strength-label{font-size:.7rem;color:var(--text-3);margin-top:.2rem;}
+    .msg{padding:.62rem .9rem;border-radius:8px;font-size:.82rem;font-weight:500;}
+    .msg.error{background:var(--red-dim);border:1px solid var(--red);color:var(--red);}
+    .msg.success{background:var(--green-dim);border:1px solid var(--green);color:var(--green);}
+    .divider{height:1px;background:var(--border);}
+    .btn-gold{width:100%;background:var(--gold);color:#0c0b14;border:none;border-radius:10px;padding:.8rem;font-family:'Outfit',sans-serif;font-weight:600;font-size:.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:all .2s;margin-top:.3rem;}
+    .btn-gold:hover{filter:brightness(1.1);box-shadow:0 4px 20px var(--gold-glow);transform:translateY(-1px);}
+    .switch{text-align:center;font-size:.82rem;color:var(--text-2);}
+    .switch a{color:var(--gold);font-weight:500;}
+    .switch a:hover{text-decoration:underline;}
+    .theme-btn{position:fixed;top:1.2rem;right:1.2rem;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text-2);font-size:.92rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;}
+    .theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+<button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-logo">Note<em>Nest</em></div>
+    <div class="brand-sub">Your community file sharing platform</div>
+  </div>
+  <div class="card">
+    <div>
+      <div class="card-title">Create an <span>account</span></div>
+      <div class="card-sub">Join and start sharing files with the community</div>
+    </div>
+    <div class="perks">
+      <div class="perk">📁 Upload any file</div>
+      <div class="perk">❤️ Like files</div>
+      <div class="perk">💬 Comment</div>
+      <div class="perk">⬇️ Download</div>
+    </div>
+    {% if messages %}{% for msg in messages %}<div class="msg {{ msg.tags }}">{{ msg }}</div>{% endfor %}{% endif %}
+    <form method="POST" class="fields" autocomplete="on">
+      {% csrf_token %}
+      <div class="field">
+        <label>Username</label>
+        <div class="fw">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" name="username" placeholder="Choose a username" required autofocus>
+        </div>
+      </div>
+      <div class="field">
+        <label>Email <span style="color:var(--text-3);text-transform:none;font-weight:400;">(optional)</span></label>
+        <div class="fw">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <input type="email" name="email" placeholder="your@email.com">
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="fw">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="pw1" name="password1" placeholder="Min. 6 characters" required oninput="strength(this.value)">
+          <button type="button" class="eye" onclick="document.getElementById('pw1').type=document.getElementById('pw1').type==='password'?'text':'password'">👁</button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="sf"></div></div>
+        <div class="strength-label" id="sl">Enter a password</div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="fw">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="pw2" name="password2" placeholder="Repeat password" required>
+          <button type="button" class="eye" onclick="document.getElementById('pw2').type=document.getElementById('pw2').type==='password'?'text':'password'">👁</button>
+        </div>
+      </div>
+      <button type="submit" class="btn-gold">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Create Account
+      </button>
+    </form>
+    <div class="divider"></div>
+    <div class="switch">Already have an account? <a href="/login/">Sign in</a></div>
+  </div>
+</div>
+<script>
+  (function(){const t=localStorage.getItem('nn-theme')||'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('themeBtn').textContent=t==='dark'?'🌙':'☀️';})();
+  function toggleTheme(){const c=document.documentElement.getAttribute('data-theme');const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('nn-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'🌙':'☀️';}
+  function strength(pw){
+    let s=0;
+    if(pw.length>=6)s++;if(pw.length>=10)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+    const lvl=[{w:'0%',c:'transparent',t:'Enter a password'},{w:'25%',c:'#e06060',t:'Too weak'},{w:'50%',c:'#e0a860',t:'Could be stronger'},{w:'75%',c:'#d4c843',t:'Good'},{w:'100%',c:'#5dba7d',t:'Strong ✓'}];
+    const l=pw.length===0?lvl[0]:lvl[Math.min(s,4)];
+    document.getElementById('sf').style.width=l.w;document.getElementById('sf').style.background=l.c;
+    document.getElementById('sl').textContent=l.t;document.getElementById('sl').style.color=l.c==='transparent'?'var(--text-3)':l.c;
+  }
+</script>
+</body>
+</html>

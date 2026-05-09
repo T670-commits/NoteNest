@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block nav_profile %}{% if is_own %}active{% endif %}{% endblock %}
+{% block content %}
+<style>
+  .profile-wrap{max-width:900px;margin:0 auto;animation:fadeUp .4s ease;}
+
+  /* HERO */
+  .profile-hero{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2rem;display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;}
+  .profile-avatar-wrap{flex-shrink:0;}
+  .profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:var(--gold);overflow:hidden;}
+  .profile-avatar img{width:100%;height:100%;object-fit:cover;}
+  .profile-info{flex:1;}
+  .profile-username{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;letter-spacing:-.3px;}
+  .profile-bio{color:var(--text-2);font-size:.88rem;line-height:1.6;margin-top:.4rem;}
+  .profile-stats{display:flex;gap:1.2rem;margin-top:.8rem;}
+  .stat{display:flex;flex-direction:column;align-items:center;gap:.1rem;}
+  .stat-num{font-size:1.3rem;font-weight:700;color:var(--gold);font-family:'Cormorant Garamond',serif;}
+  .stat-label{font-size:.72rem;color:var(--text-3);}
+
+  /* EDIT FORM */
+  .edit-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+  .edit-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;margin-bottom:1rem;}
+  .edit-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .btn-save{background:var(--gold);color:#0c0b14;border:none;border-radius:10px;padding:.7rem 1.5rem;font-family:'Outfit',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;margin-top:.5rem;transition:all .2s;}
+  .btn-save:hover{filter:brightness(1.1);}
+
+  /* FILES */
+  .section-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;margin-bottom:1rem;}
+  .files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;}
+  .mini-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s;animation:fadeUp .4s ease both;}
+  .mini-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.18);}
+  .mini-preview{height:140px;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .mini-preview img{width:100%;height:100%;object-fit:cover;}
+  .mini-icon{font-size:2.5rem;opacity:.3;}
+  .mini-body{padding:.9rem 1rem;}
+  .mini-title{font-size:.9rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mini-meta{font-size:.73rem;color:var(--text-3);margin-top:.25rem;}
+  .mini-actions{display:flex;gap:.4rem;padding:.7rem 1rem;border-top:1px solid var(--border);}
+  .mini-btn{font-size:.75rem;color:var(--text-2);border:1px solid var(--border);border-radius:6px;padding:.25rem .6rem;transition:all .18s;}
+  .mini-btn:hover{color:var(--gold);border-color:var(--gold);}
+  .mini-btn.del:hover{color:var(--red);border-color:var(--red);}
+
+  .empty-files{color:var(--text-3);font-size:.88rem;font-style:italic;padding:2rem 0;}
+</style>
+
+<div class="profile-wrap">
+  <!-- HERO -->
+  <div class="profile-hero">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar">
+        {% if profile.avatar %}<img src="{{ profile.avatar.url }}" alt="avatar">
+        {% else %}{{ profile_user.username|first|upper }}{% endif %}
+      </div>
+    </div>
+    <div class="profile-info">
+      <div class="profile-username">{{ profile_user.username }}</div>
+      <div class="profile-bio">{% if profile.bio %}{{ profile.bio }}{% else %}<em style="opacity:.4;">No bio yet.</em>{% endif %}</div>
+      <div class="profile-stats">
+        <div class="stat">
+          <div class="stat-num">{{ user_files.count }}</div>
+          <div class="stat-label">Files</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">{{ profile_user.likes.count }}</div>
+          <div class="stat-label">Likes given</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">{{ profile_user.comments.count }}</div>
+          <div class="stat-label">Comments</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE (own only) -->
+  {% if is_own %}
+  <div class="edit-section">
+    <div class="edit-title">✏️ Edit Profile</div>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:flex;flex-direction:column;gap:.9rem;">
+        <div class="f-group">
+          <label class="f-label">Bio</label>
+          <textarea class="f-textarea" name="bio" placeholder="Tell people about yourself…" style="min-height:80px;">{{ profile.bio }}</textarea>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Profile Picture</label>
+          <input class="f-input" type="file" name="avatar" accept="image/*" style="padding:.5rem;">
+        </div>
+        <div><button type="submit" class="btn-save">Save Changes</button></div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- FILES -->
+  <div class="section-title">📁 {{ profile_user.username }}'s Files</div>
+  {% if user_files %}
+  <div class="files-grid">
+    {% for f in user_files %}
+    <div class="mini-card">
+      <div class="mini-preview">
+        {% if f.is_image %}<img src="{{ f.file.url }}" loading="lazy">
+        {% elif f.is_video %}<div class="mini-icon">🎬</div>
+        {% elif f.is_audio %}<div class="mini-icon">🎵</div>
+        {% elif f.is_pdf %}<div class="mini-icon">📄</div>
+        {% else %}<div class="mini-icon">📦</div>{% endif %}
+      </div>
+      <div class="mini-body">
+        <div class="mini-title">{{ f.title }}</div>
+        <div class="mini-meta">{{ f.uploaded_at|date:"M d, Y" }} · {{ f.like_count }} ❤️ · {{ f.comment_count }} 💬</div>
+      </div>
+      <div class="mini-actions">
+        <a href="/file/{{ f.pk }}/" class="mini-btn">View</a>
+        <a href="/file/{{ f.pk }}/download/" class="mini-btn">⬇️ Download</a>
+        {% if is_own %}
+        <a href="/file/{{ f.pk }}/delete/" class="mini-btn del" onclick="return confirm('Delete?')">🗑</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-files">No files uploaded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}
