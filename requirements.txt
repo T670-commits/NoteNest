@@ -1,6 +1,5 @@
-asgiref==3.11.1
-Django==6.0.4
-gunicorn==26.0.0
-packaging==26.2
-pillow==12.2.0
-sqlparse==0.5.5
+Django==4.2.7
+gunicorn==21.2.0
+Pillow==10.1.0
+sqlparse==0.4.4
+asgiref==3.7.2
